@@ -7,6 +7,7 @@ import {
   getFilteredRowModel,
   getSortedRowModel,
   useReactTable,
+  getPaginationRowModel,
 } from "@tanstack/react-table";
 
 import {
@@ -71,17 +72,19 @@ function App() {
   const [sorting, setSorting] = useState([]);
   const [globalFilter, setGlobalFilter] = useState("");
 
+  const [pagination, setPagination] = useState({
+    pageIndex: 0, //initial page index
+    pageSize: 5, //default page size
+  });
+
   const table = useReactTable({
     data,
     columns,
     state: {
       sorting,
       globalFilter,
-    },
-    initialState: {
-      pagination: {
-        pageSize: 5,
-      },
+
+      pagination,
     },
     getCoreRowModel: getCoreRowModel(),
 
@@ -90,6 +93,9 @@ function App() {
 
     onGlobalFilterChange: setGlobalFilter,
     getFilteredRowModel: getFilteredRowModel(),
+
+    getPaginationRowModel: getPaginationRowModel(),
+    onPaginationChange: setPagination, //update the pagination state when internal APIs mutate the pagination state
   });
 
   return (
@@ -162,7 +168,7 @@ function App() {
             value={table.getState().pagination.pageSize}
             onChange={(e) => table.setPageSize(Number(e.target.value))}
           >
-            {[5, 10, 15, 20].map((pageSize) => (
+            {[5, 10, 20, 30].map((pageSize) => (
               <option key={pageSize} value={pageSize}>
                 Show {pageSize}
               </option>
@@ -199,6 +205,7 @@ function App() {
               }}
               className="w-16 p-2 text-center border border-gray-300 rounded-md"
             />
+            <span className="ml-1">of {table.getPageCount()}</span>
           </span>
 
           <button
